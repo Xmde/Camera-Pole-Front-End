@@ -1,6 +1,8 @@
 import moment from "moment";
 import type { NextApiRequest, NextApiResponse } from "next";
 import prisma from "../../../lib/prisma";
+import { Event } from "@prisma/client";
+import { eventWithPlateAndCamera } from "../../../interfaces";
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   const mainEvent = await prisma.event.findUnique({
@@ -31,7 +33,11 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       },
       take: 10,
       include: {
-        plate: true,
+        plate: {
+          include: {
+            vehicle_type: true,
+          },
+        },
         camera: true,
       },
     });
@@ -39,7 +45,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     const eventsBefore = await prisma.event.findMany({
       where: {
         timestamp: {
-          gte: moment(mainEvent.timestamp).subtract(15, "minutes").toDate(),
+          gte: moment(mainEvent.timestamp).subtract(30, "minutes").toDate(),
           lte: moment(mainEvent.timestamp).toDate(),
         },
         plate_id: {
@@ -55,7 +61,11 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       },
       take: 10,
       include: {
-        plate: true,
+        plate: {
+          include: {
+            vehicle_type: true,
+          },
+        },
         camera: true,
       },
     });
@@ -76,7 +86,36 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       }
     }
 
-    res.status(200).json(events);
+    const data: {
+      event: eventWithPlateAndCamera;
+      otherEvents: eventWithPlateAndCamera[];
+    }[] = [];
+    for (const event of events) {
+      // Take the 4 newest events with the same plate id
+      const otherEvents = await prisma.event.findMany({
+        where: {
+          plate_id: event.plate_id,
+          id: {
+            not: event.id,
+          },
+        },
+        orderBy: {
+          timestamp: "desc",
+        },
+        take: 4,
+        include: {
+          plate: {
+            include: {
+              vehicle_type: true,
+            },
+          },
+          camera: true,
+        },
+      });
+      data.push({ event, otherEvents });
+    }
+
+    res.status(200).json(data);
   } catch (e: any) {
     res.status(500).json({ error: e.message });
   }

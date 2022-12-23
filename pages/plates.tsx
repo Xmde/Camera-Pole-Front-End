@@ -238,6 +238,13 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
       vehicle_type: {
         name: "Unidentified",
       },
+      events: {
+        every: {
+          timestamp: {
+            gte: moment.unix(filter_date).toDate(),
+          },
+        },
+      },
     },
   });
 

@@ -1,10 +1,11 @@
-import { Plate } from "@prisma/client";
+import { Plate, Event } from "@prisma/client";
 import moment from "moment";
 import Image from "next/image";
 import { useState } from "react";
 import Layout from "../components/layout";
-import { eventWithCamera } from "../interfaces";
+import { eventWithCamera, eventWithPlateAndCamera } from "../interfaces";
 import uuid4 from "uuid4";
+import PopupImage from "../components/popup";
 
 let date = "";
 
@@ -13,12 +14,20 @@ export default function Classify() {
   myHeaders.append("Content-Type", "application/json");
 
   const [mainData, setData]: [
-    { event: eventWithCamera | null; nearPlates: any },
+    {
+      event: eventWithCamera | null;
+      nearPlates: {
+        event: eventWithPlateAndCamera;
+        otherEvents: eventWithPlateAndCamera[];
+      }[];
+    },
     any
   ] = useState({
     event: null,
-    nearPlates: null,
+    nearPlates: [],
   });
+
+  const [popupImage, setPopupImage] = useState("");
 
   const update = async () => {
     if (date === "") return;
@@ -34,7 +43,10 @@ export default function Classify() {
     if (data.length == 0) return setData({ event: null, nearPlates: null });
 
     const nearPlatesRaw = await fetch("/api/getnearplates/" + data[0].id);
-    const nearPlatesData = await nearPlatesRaw.json();
+    const nearPlatesData: {
+      event: eventWithPlateAndCamera;
+      otherEvents: eventWithPlateAndCamera[];
+    }[] = await nearPlatesRaw.json();
 
     setData({
       event: data[0],
@@ -171,23 +183,38 @@ export default function Classify() {
           </div>
         </div>
         <div className="d-flex flex-wrap">
-          {mainData.nearPlates.map((plate: any) => (
+          {mainData.nearPlates.map((plate) => (
             <div
-              key={"div" + plate.id}
-              className="mx-1 mb-2 border border-dark rounded"
-              style={{ cursor: "pointer", width: "250px", height: "250px" }}
-              onClick={() => classify(plate.plate_id, "Vehicle")}
+              key={"div" + plate.event.id}
+              className="mx-1 mb-2 border border-dark rounded d-flex flex-column"
+              style={{ width: "250px", height: "250px" }}
             >
               <Image
-                src={plate.image}
+                src={plate.event.image}
                 alt="Picture of Vehicle"
                 width={250}
                 height={220}
-                key={"img" + plate.id}
+                key={"img" + plate.event.id}
+                style={{ cursor: "pointer" }}
+                onClick={() => classify(plate.event.plate_id, "Vehicle")}
               />
-              <p className="text-center my-0" key={"p" + plate.id}>
-                {plate.plate.plate} - {plate.camera.camera_number} -{" "}
-                {moment(plate.timestamp).format("mm")}
+              <div className="d-flex justify-content-around">
+                {plate.otherEvents.map((event, index) => {
+                  return (
+                    <p
+                      className="btn btn-outline-info btn-sm py-0 my-1"
+                      style={{ fontSize: "0.8rem" }}
+                      key={"p" + event.id}
+                      onClick={() => setPopupImage(event.image)}
+                    >
+                      IMG {index + 1}
+                    </p>
+                  );
+                })}
+              </div>
+              <p className="text-center my-0" key={"p" + plate.event.id}>
+                {plate.event.plate?.plate} - {plate.event.camera.camera_number}{" "}
+                - {moment(plate.event.timestamp).format("mm")}
               </p>
             </div>
           ))}
@@ -207,6 +234,7 @@ export default function Classify() {
   return (
     <Layout active_navbar="1">
       <>
+        <PopupImage image={popupImage} closePopup={() => setPopupImage("")} />
         <div className="d-flex justify-content-center my-1">
           <button
             type="button"

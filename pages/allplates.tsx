@@ -5,6 +5,10 @@ import Layout from "../components/layout";
 import PopupImage from "../components/popup";
 import { plateWithVehicleType } from "../interfaces";
 import prisma from "../lib/prisma";
+import cookie from "cookie";
+import { useCookies } from "react-cookie";
+import moment from "moment";
+import { useRouter } from "next/router";
 
 export default function Plates({
   plates: platesProps,
@@ -18,6 +22,8 @@ export default function Plates({
 
   const [plates, setPlates] = useState(platesProps);
   const [image, setImage] = useState("");
+  const [cookie, setCookie] = useCookies(["filter_date"]);
+  const router = useRouter();
 
   const handleTypeChange = async (vehicleTypeId: string, plateId: string) => {
     const raw = JSON.stringify({
@@ -49,6 +55,15 @@ export default function Plates({
       .catch((error) => console.log("error", error));
   };
 
+  const updateCookie = () => {
+    setCookie("filter_date", moment().unix(), {
+      path: "/",
+      maxAge: 60 * 60 * 24 * 365 * 10, // 10 years
+      sameSite: true,
+    });
+    router.reload();
+  };
+
   const generateImgHtml = (events: Event[]) => {
     return (
       <div className="d-flex">
@@ -71,17 +86,29 @@ export default function Plates({
     <Layout active_navbar="4">
       <>
         <PopupImage image={image} closePopup={() => setImage("")} />
-        <div className="container-xl">
+        <div className="container-fluid">
           <div className="row">
             <div className="col-12">
               <div className="d-flex justify-content-center align-items-center">
+                <p
+                  className="btn btn-outline-info mx-3 my-0"
+                  onClick={() => router.push("/allplates")}
+                >
+                  All Plates
+                </p>
                 <h1 className="text-center display-6 mx-3 my-0">
                   Plate Editor
                 </h1>
+                <p
+                  className="btn btn-outline-info mx-3 my-0"
+                  onClick={updateCookie}
+                >
+                  Finished Classifying
+                </p>
               </div>
               {plates.length == 0 && (
                 <div className="text-center">
-                  <h2 className="text-danger">No plates found</h2>
+                  <h2 className="text-danger">No plates to classify</h2>
                 </div>
               )}
               {plates.length > 0 && (
@@ -89,6 +116,7 @@ export default function Plates({
                   <thead>
                     <tr>
                       <th scope="col">Plate</th>
+                      <th scope="col">Highest</th>
                       <th scope="col">Options</th>
                       <th scope="col">Images</th>
                     </tr>
@@ -100,8 +128,18 @@ export default function Plates({
                           <th scope="row" className="w-1 align-middle">
                             {plate.plate}
                           </th>
-                          <td>
-                            <div key={"div" + plate.id} className="d-flex">
+                          <td className="align-middle">
+                            {plate.events.reduce((prev, current) => {
+                              return Number(current.camera_id) > prev
+                                ? Number(current.camera_id)
+                                : prev;
+                            }, 0)}
+                          </td>
+                          <td className="py-0 align-middle">
+                            <div
+                              key={"div" + plate.id}
+                              className="d-flex flex-wrap"
+                            >
                               {vehicleTypes.map((vehicleType) => {
                                 return (
                                   <div
@@ -125,7 +163,8 @@ export default function Plates({
                                       }
                                     />
                                     <label
-                                      className="btn btn-secondary"
+                                      className="btn btn-outline-secondary btn-sm py-0"
+                                      style={{ fontSize: "0.8rem" }}
                                       htmlFor={plate.id + vehicleType.id}
                                     >
                                       {vehicleType.name}
@@ -151,7 +190,7 @@ export default function Plates({
 }
 
 export async function getServerSideProps(context: GetServerSidePropsContext) {
-  const plates = await prisma.plate.findMany({
+  let plates = await prisma.plate.findMany({
     include: {
       vehicle_type: true,
       events: {
