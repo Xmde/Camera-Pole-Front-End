@@ -1,0 +1,31 @@
+.main {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+  grid-template-rows: 75px 1fr;
+}
+
+.title {
+  text-align: center;
+  margin: 0px;
+  color: white;
+  flex-grow: 1;
+}
+
+.homeBtn {
+  font-size: 15pt;
+  color: white;
+  float: left;
+  margin-top: auto;
+  margin-bottom: auto;
+}
+
+.topBar {
+  background-color: black;
+  border: 3px solid black;
+  margin: 5px;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  grid-row: 1;
+  grid-column: 1 / 6;
+}

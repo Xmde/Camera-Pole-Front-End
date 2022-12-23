@@ -1,0 +1,68 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Camera {
+  id            String  @id
+  camera_number Int     @unique
+  facing        Facing  @default(North)
+  Event         Event[]
+}
+
+model Event {
+  id          String     @id
+  plate_id    String?
+  object_type ObjectType @default(Unknown)
+  camera_id   String
+  timestamp   DateTime   @default(now())
+  image       String
+  direction   Direction  @default(Unknown)
+  event_type  EventType
+  Camera      Camera     @relation(fields: [camera_id], references: [id])
+  Plate       Plate?     @relation(fields: [plate_id], references: [id])
+}
+
+model Plate {
+  id              String      @id @default(uuid())
+  plate           String     @unique
+  vehicle_type_id String
+  VehicleType     VehicleType @relation(fields: [vehicle_type_id], references: [id])
+  Event           Event[]
+}
+
+model VehicleType {
+  id    String  @id
+  name  String  @unique
+  Plate Plate[]
+}
+
+enum Direction {
+  Forward
+  Backward
+  Unknown
+}
+
+enum EventType {
+  Vehicle
+  Motion
+}
+
+enum Facing {
+  North
+  South
+  East
+  West
+}
+
+enum ObjectType {
+  People
+  Bicycle
+  Vehicle
+  Unknown
+  None
+}
