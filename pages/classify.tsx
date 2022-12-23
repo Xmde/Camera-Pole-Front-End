@@ -68,15 +68,23 @@ export default function Classify() {
     update();
   };
 
-  const newVehicle = async (motorbiker: boolean) => {
-    let newPlate = prompt("Enter new plate number");
-    if (newPlate == null) return;
-    if (newPlate == "")
-      newPlate = "RP - " + uuid4().substring(0, 8).toUpperCase();
+  const newVehicle = async (motorbike: boolean) => {
+    // let newPlate = prompt("Enter new plate number");
+    // if (newPlate == null) return;
+    // if (newPlate == "" && !motorbike)
+    //   newPlate = "UV - " + uuid4().substring(0, 8).toUpperCase();
+    // if (newPlate == "" && motorbike)
+    //   newPlate = "MB - " + uuid4().substring(0, 8).toUpperCase();
+    let newPlate: string;
+    if (!motorbike) {
+      newPlate = "UV - " + uuid4().substring(0, 8).toUpperCase();
+    } else {
+      newPlate = "MB - " + uuid4().substring(0, 8).toUpperCase();
+    }
 
     const raw = JSON.stringify({
       plate: newPlate,
-      vehicle_type_id: motorbiker ? "motorbike" : null,
+      vehicle_type_id: motorbike ? "motorbike" : null,
     });
 
     console.log(raw);
@@ -105,20 +113,62 @@ export default function Classify() {
         </div>
       );
     return (
-      <div className="mt-1 d-flex">
-        <div className="border border-dark rounded mx-1 d-inline-flex flex-column h-100">
-          <Image
-            src={mainData.event!.image}
-            alt="Picture of Vehicle"
-            width={508}
-            height={508}
-            style={{ float: "left" }}
-          />
-          <p className="text-center my-0">
-            {mainData.event!.camera.camera_number +
-              " - " +
-              moment(mainData.event!.timestamp).format("mm")}
-          </p>
+      <div className="mt-1">
+        <div
+          className="d-flex flex-column"
+          style={{ width: "518px", float: "left" }}
+        >
+          <div className="border border-dark rounded mx-1 d-inline-flex flex-column h-100">
+            <Image
+              src={mainData.event!.image}
+              alt="Picture of Vehicle"
+              width={508}
+              height={508}
+              style={{ float: "left" }}
+            />
+            <p className="text-center my-0">
+              {mainData.event!.camera.camera_number +
+                " - " +
+                moment(mainData.event!.timestamp).format("mm")}
+            </p>
+          </div>
+          <div className="d-flex flex-wrap">
+            <div
+              className="m-1 p-3 border border-dark rounded d-flex justify-content-center align-items-center text-center"
+              style={{ cursor: "pointer", height: "50px" }}
+              onClick={() => classify(null, "Bicycle")}
+            >
+              <p className="text-center my-0 display-6">Bikers</p>
+            </div>
+            <div
+              className="m-1 p-3 border border-dark rounded d-flex justify-content-center align-items-center text-center"
+              style={{ cursor: "pointer", height: "50px" }}
+              onClick={() => newVehicle(true)}
+            >
+              <p className="text-center my-0 display-6">Motorbike</p>
+            </div>
+            <div
+              className="m-1 p-3 border border-dark rounded d-flex justify-content-center align-items-center text-center"
+              style={{ cursor: "pointer", height: "50px" }}
+              onClick={() => classify(null, "People")}
+            >
+              <p className="text-center my-0 display-6">People</p>
+            </div>
+            <div
+              className="m-1 p-3 border border-dark rounded d-flex justify-content-center align-items-center text-center"
+              style={{ cursor: "pointer", height: "50px" }}
+              onClick={() => classify(null, "None")}
+            >
+              <p className="text-center my-0 display-6">Nothing</p>
+            </div>
+            <div
+              className="m-1 p-3 border border-dark rounded d-flex justify-content-center align-items-center text-center"
+              style={{ cursor: "pointer", height: "50px" }}
+              onClick={() => newVehicle(false)}
+            >
+              <p className="text-center my-0 display-6">New Vehicle</p>
+            </div>
+          </div>
         </div>
         <div className="d-flex flex-wrap">
           {mainData.nearPlates.map((plate: any) => (
@@ -141,41 +191,6 @@ export default function Classify() {
               </p>
             </div>
           ))}
-          <div
-            className="mx-1 mb-2 border border-dark rounded d-flex justify-content-center align-items-center"
-            style={{ cursor: "pointer", width: "250px", height: "250px" }}
-            onClick={() => classify(null, "Bicycle")}
-          >
-            <p className="text-center my-0 display-5">Bikers</p>
-          </div>
-          <div
-            className="mx-1 mb-2 border border-dark rounded d-flex justify-content-center align-items-center"
-            style={{ cursor: "pointer", width: "250px", height: "250px" }}
-            onClick={() => newVehicle(true)}
-          >
-            <p className="text-center my-0 display-5">Motorbiker</p>
-          </div>
-          <div
-            className="mx-1 mb-2 border border-dark rounded d-flex justify-content-center align-items-center"
-            style={{ cursor: "pointer", width: "250px", height: "250px" }}
-            onClick={() => classify(null, "People")}
-          >
-            <p className="text-center my-0 display-5">People</p>
-          </div>
-          <div
-            className="mx-1 mb-2 border border-dark rounded d-flex justify-content-center align-items-center"
-            style={{ cursor: "pointer", width: "250px", height: "250px" }}
-            onClick={() => classify(null, "None")}
-          >
-            <p className="text-center my-0 display-5">Nothing in Image</p>
-          </div>
-          <div
-            className="mx-1 mb-2 border border-dark rounded d-flex justify-content-center align-items-center"
-            style={{ cursor: "pointer", width: "250px", height: "250px" }}
-            onClick={() => newVehicle(false)}
-          >
-            <p className="text-center my-0 display-5">New Vehicle</p>
-          </div>
         </div>
       </div>
     );

@@ -86,7 +86,7 @@ export default function Plates({
     <Layout active_navbar="4">
       <>
         <PopupImage image={image} closePopup={() => setImage("")} />
-        <div className="container-xl">
+        <div className="container-fluid">
           <div className="row">
             <div className="col-12">
               <div className="d-flex justify-content-center align-items-center">
@@ -224,6 +224,23 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
     },
   });
 
+  const unknownPlates = await prisma.plate.findMany({
+    include: {
+      vehicle_type: true,
+      events: {
+        take: 4,
+        orderBy: {
+          timestamp: "asc",
+        },
+      },
+    },
+    where: {
+      vehicle_type: {
+        name: "Unidentified",
+      },
+    },
+  });
+
   // Gets rid of plates which only have events on one day.
   plates = plates.filter((plate) => {
     let days = new Set();
@@ -232,6 +249,8 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
     });
     return days.size > 1;
   });
+
+  plates = plates.concat(unknownPlates);
 
   //Sort plates so that the ones with the most recent event are at the top
   plates.sort((a, b) => {

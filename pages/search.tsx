@@ -109,7 +109,7 @@ export default function Search(data: EventQuery) {
     <Layout active_navbar="2">
       <>
         <PopupImage image={popupImage} closePopup={closePopup} />
-        <div className="container-xl">
+        <div className="container-fluid">
           <div className="row">
             <div className=" col">
               <h1 className="text-center display-6">Plate Lookup</h1>
@@ -191,6 +191,26 @@ export default function Search(data: EventQuery) {
                   })}
                 </tbody>
               </table>
+              {(data.plate_events.length == 25 || data.plate_page > 1) && (
+                <div className="d-flex justify-content-center m-2">
+                  <button
+                    type="button"
+                    className="btn btn-primary mx-1"
+                    onClick={gotoPrevPlatePage}
+                    disabled={data.plate_page === 1}
+                  >
+                    Previous
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-primary mx-1"
+                    onClick={gotoNextPlatePage}
+                    disabled={data.plate_events.length !== 25}
+                  >
+                    Next
+                  </button>
+                </div>
+              )}
             </div>
             <div className=" col">
               <h1 className="text-center display-6">Time Lookup</h1>
@@ -244,6 +264,7 @@ export default function Search(data: EventQuery) {
                     <th scope="col">Time</th>
                     <th scope="col">Type</th>
                     <th scope="col">Plate</th>
+                    <th scope="col">P-Type</th>
                     <th scope="col">Camera #</th>
                     <th scope="col">Direction</th>
                     <th scope="col">Image</th>
@@ -265,6 +286,9 @@ export default function Search(data: EventQuery) {
                         <td className="align-middle">{value.object_type} </td>
                         <td className="align-middle">{value.plate?.plate} </td>
                         <td className="align-middle">
+                          {value.plate?.vehicle_type.name}{" "}
+                        </td>
+                        <td className="align-middle">
                           {value.camera.camera_number}
                         </td>
                         <td className="align-middle">
@@ -283,6 +307,26 @@ export default function Search(data: EventQuery) {
                   })}
                 </tbody>
               </table>
+              {(data.time_events.length == 25 || data.time_page > 1) && (
+                <div className="d-flex justify-content-center m-2">
+                  <button
+                    type="button"
+                    className="btn btn-primary mx-1"
+                    onClick={gotoPrevTimePage}
+                    disabled={data.time_page === 1}
+                  >
+                    Previous
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-primary mx-1"
+                    onClick={gotoNextTimePage}
+                    disabled={data.time_events.length !== 25}
+                  >
+                    Next
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -311,7 +355,11 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
         plate_id: plate_id,
       },
       include: {
-        plate: true,
+        plate: {
+          include: {
+            vehicle_type: true,
+          },
+        },
         camera: true,
       },
       orderBy: {
@@ -331,7 +379,11 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
         },
       },
       include: {
-        plate: true,
+        plate: {
+          include: {
+            vehicle_type: true,
+          },
+        },
         camera: true,
       },
       orderBy: {

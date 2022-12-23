@@ -35,12 +35,21 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       let vehicle_type_id = req.body.vehicle_type_id;
       try {
         if (!vehicle_type_id) {
-          const vehicle_type = await prisma.vehicleType.findUniqueOrThrow({
-            where: {
-              name: "Public",
-            },
-          });
-          vehicle_type_id = vehicle_type.id;
+          if (req.body.plate.startsWith("UV")) {
+            const vehicle_type = await prisma.vehicleType.findUniqueOrThrow({
+              where: {
+                name: "Unidentified",
+              },
+            });
+            vehicle_type_id = vehicle_type.id;
+          } else {
+            const vehicle_type = await prisma.vehicleType.findUniqueOrThrow({
+              where: {
+                name: "Public",
+              },
+            });
+            vehicle_type_id = vehicle_type.id;
+          }
         }
 
         if (vehicle_type_id === "motorbike") {

@@ -9,7 +9,11 @@ export interface EventQuery {
 
 const eventWithPlateAndCamera = Prisma.validator<Prisma.EventArgs>()({
   include: {
-    plate: true,
+    plate: {
+      include: {
+        vehicle_type: true,
+      },
+    },
     camera: true,
   },
 });

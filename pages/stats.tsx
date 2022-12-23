@@ -224,7 +224,7 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
       numTrailers += 1;
     }
 
-    if (timeSinceLastEvent > 3) {
+    if (timeSinceLastEvent > 5) {
       if (numCabs > numTrailers) truckAndTrailerEstimate += numCabs;
       else truckAndTrailerEstimate += numTrailers;
       numCabs = 0;

@@ -16,7 +16,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       where: {
         timestamp: {
           gte: moment(mainEvent.timestamp).toDate(),
-          lte: moment(mainEvent.timestamp).add(15, "minutes").toDate(),
+          lte: moment(mainEvent.timestamp).add(30, "minutes").toDate(),
         },
         plate_id: {
           not: null,
