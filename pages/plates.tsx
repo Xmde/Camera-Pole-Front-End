@@ -116,6 +116,7 @@ export default function Plates({
                   <thead>
                     <tr>
                       <th scope="col">Plate</th>
+                      <th scope="col">Highest</th>
                       <th scope="col">Options</th>
                       <th scope="col">Images</th>
                     </tr>
@@ -127,8 +128,18 @@ export default function Plates({
                           <th scope="row" className="w-1 align-middle">
                             {plate.plate}
                           </th>
-                          <td>
-                            <div key={"div" + plate.id} className="d-flex">
+                          <td className="align-middle">
+                            {plate.events.reduce((prev, current) => {
+                              return Number(current.camera_id) > prev
+                                ? Number(current.camera_id)
+                                : prev;
+                            }, 0)}
+                          </td>
+                          <td className="py-0 align-middle">
+                            <div
+                              key={"div" + plate.id}
+                              className="d-flex flex-wrap"
+                            >
                               {vehicleTypes.map((vehicleType) => {
                                 return (
                                   <div
@@ -152,7 +163,8 @@ export default function Plates({
                                       }
                                     />
                                     <label
-                                      className="btn btn-secondary"
+                                      className="btn btn-outline-secondary btn-sm py-0"
+                                      style={{ fontSize: "0.8rem" }}
                                       htmlFor={plate.id + vehicleType.id}
                                     >
                                       {vehicleType.name}
@@ -162,7 +174,7 @@ export default function Plates({
                               })}
                             </div>
                           </td>
-                          <td>{generateImgHtml(plate.Event)}</td>
+                          <td>{generateImgHtml(plate.events)}</td>
                         </tr>
                       );
                     })}
@@ -181,10 +193,10 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
   const cookies = cookie.parse(context.req.headers.cookie ?? "");
   const filter_date = Number(cookies.filter_date) || 0;
   console.log(moment.unix(filter_date).format("YYYY-MM-DD HH:mm:ss"));
-  const plates = await prisma.plate.findMany({
+  let plates = await prisma.plate.findMany({
     include: {
-      VehicleType: true,
-      Event: {
+      vehicle_type: true,
+      events: {
         take: 4,
         orderBy: {
           timestamp: "asc",
@@ -192,14 +204,14 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
       },
     },
     where: {
-      VehicleType: {
+      vehicle_type: {
         name: "Public",
       },
-      Event: {
+      events: {
         some: {
-          Camera: {
+          camera: {
             camera_number: {
-              gte: 30,
+              gte: 22,
             },
           },
         },
@@ -212,11 +224,20 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
     },
   });
 
+  // Gets rid of plates which only have events on one day.
+  plates = plates.filter((plate) => {
+    let days = new Set();
+    plate.events.forEach((event) => {
+      days.add(moment(event.timestamp).subtract(8, "h").format("YYYY-MM-DD"));
+    });
+    return days.size > 1;
+  });
+
   //Sort plates so that the ones with the most recent event are at the top
   plates.sort((a, b) => {
-    if (a.Event[0].timestamp > b.Event[0].timestamp) {
+    if (a.events[0].timestamp > b.events[0].timestamp) {
       return -1;
-    } else if (a.Event[0].timestamp < b.Event[0].timestamp) {
+    } else if (a.events[0].timestamp < b.events[0].timestamp) {
       return 1;
     } else {
       return 0;

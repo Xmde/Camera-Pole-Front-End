@@ -135,7 +135,7 @@ export default function Plates({
                               })}
                             </div>
                           </td>
-                          <td>{generateImgHtml(plate.Event)}</td>
+                          <td>{generateImgHtml(plate.events)}</td>
                         </tr>
                       );
                     })}
@@ -153,8 +153,8 @@ export default function Plates({
 export async function getServerSideProps(context: GetServerSidePropsContext) {
   const plates = await prisma.plate.findMany({
     include: {
-      VehicleType: true,
-      Event: {
+      vehicle_type: true,
+      events: {
         take: 4,
         orderBy: {
           timestamp: "asc",
@@ -165,9 +165,9 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
 
   //Sort plates so that the ones with the most recent event are at the top
   plates.sort((a, b) => {
-    if (a.Event[0].timestamp > b.Event[0].timestamp) {
+    if (a.events[0].timestamp > b.events[0].timestamp) {
       return -1;
-    } else if (a.Event[0].timestamp < b.Event[0].timestamp) {
+    } else if (a.events[0].timestamp < b.events[0].timestamp) {
       return 1;
     } else {
       return 0;

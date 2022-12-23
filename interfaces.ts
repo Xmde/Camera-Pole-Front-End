@@ -9,8 +9,8 @@ export interface EventQuery {
 
 const eventWithPlateAndCamera = Prisma.validator<Prisma.EventArgs>()({
   include: {
-    Plate: true,
-    Camera: true,
+    plate: true,
+    camera: true,
   },
 });
 
@@ -20,8 +20,8 @@ export type eventWithPlateAndCamera = Prisma.EventGetPayload<
 
 const plateWithVehicleType = Prisma.validator<Prisma.PlateArgs>()({
   include: {
-    VehicleType: true,
-    Event: true,
+    vehicle_type: true,
+    events: true,
   },
 });
 
@@ -31,8 +31,8 @@ export type plateWithVehicleType = Prisma.PlateGetPayload<
 
 const eventWithCamera = Prisma.validator<Prisma.EventArgs>()({
   include: {
-    Plate: true,
-    Camera: true,
+    plate: true,
+    camera: true,
   },
 });
 

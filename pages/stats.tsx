@@ -142,9 +142,9 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
       timestamp: "asc",
     },
     include: {
-      Plate: {
+      plate: {
         include: {
-          VehicleType: true,
+          vehicle_type: true,
         },
       },
     },
@@ -152,7 +152,7 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
 
   const dbPlates = await prisma.plate.findMany({
     include: {
-      VehicleType: true,
+      vehicle_type: true,
     },
   });
 
@@ -167,18 +167,18 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
 
   for (const event of events) {
     if (event.plate_id === null) continue;
-    if (plateTimes[event.Plate!.plate] === undefined) {
-      plateTimes[event.Plate!.plate] = moment(event.timestamp);
-      plateCounts[event.Plate!.plate] = 1;
+    if (plateTimes[event.plate!.plate] === undefined) {
+      plateTimes[event.plate!.plate] = moment(event.timestamp);
+      plateCounts[event.plate!.plate] = 1;
     } else {
       const timeSinceLastPlate = moment(event.timestamp).diff(
-        plateTimes[event.Plate!.plate],
+        plateTimes[event.plate!.plate],
         "minutes"
       );
-      if (timeSinceLastPlate > 3) {
-        plateCounts[event.Plate!.plate] += 1;
+      if (timeSinceLastPlate > 5) {
+        plateCounts[event.plate!.plate] += 1;
       }
-      plateTimes[event.Plate!.plate] = moment(event.timestamp);
+      plateTimes[event.plate!.plate] = moment(event.timestamp);
     }
   }
 
@@ -190,7 +190,7 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
 
   for (const plate of dbPlates) {
     if (plateCounts[plate.plate] === undefined) continue;
-    vehicleTypeCounts[plate.VehicleType.name] += plateCounts[plate.plate];
+    vehicleTypeCounts[plate.vehicle_type.name] += plateCounts[plate.plate];
   }
 
   const totalVehicles = Object.values(plateCounts).reduce((a, b) => a + b, 0);
@@ -204,23 +204,23 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
   let truckAndTrailerEstimate = 0;
   let seenPlates: string[] = [];
   for (const event of events) {
-    if (event.Plate === null) continue;
+    if (event.plate === null) continue;
     if (
-      event.Plate.VehicleType.name !== "Shanda Cab" &&
-      event.Plate.VehicleType.name !== "Shanda Trailer"
+      event.plate.vehicle_type.name !== "Shanda Cab" &&
+      event.plate.vehicle_type.name !== "Shanda Trailer"
     )
       continue;
-    if (seenPlates.includes(event.Plate.plate)) continue;
-    seenPlates.push(event.Plate.plate);
+    if (seenPlates.includes(event.plate.plate)) continue;
+    seenPlates.push(event.plate.plate);
 
     const timeSinceLastEvent = moment(event.timestamp).diff(
       previousEvent,
       "minutes"
     );
 
-    if (event.Plate.VehicleType.name === "Shanda Cab") {
+    if (event.plate.vehicle_type.name === "Shanda Cab") {
       numCabs += 1;
-    } else if (event.Plate.VehicleType.name === "Shanda Trailer") {
+    } else if (event.plate.vehicle_type.name === "Shanda Trailer") {
       numTrailers += 1;
     }
 

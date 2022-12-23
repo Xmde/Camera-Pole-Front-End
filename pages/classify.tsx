@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useState } from "react";
 import Layout from "../components/layout";
 import { eventWithCamera } from "../interfaces";
+import uuid4 from "uuid4";
 
 let date = "";
 
@@ -68,8 +69,10 @@ export default function Classify() {
   };
 
   const newVehicle = async (motorbiker: boolean) => {
-    const newPlate = prompt("Enter new plate number");
+    let newPlate = prompt("Enter new plate number");
     if (newPlate == null) return;
+    if (newPlate == "")
+      newPlate = "RP - " + uuid4().substring(0, 8).toUpperCase();
 
     const raw = JSON.stringify({
       plate: newPlate,
@@ -112,7 +115,9 @@ export default function Classify() {
             style={{ float: "left" }}
           />
           <p className="text-center my-0">
-            Camera Number - {mainData.event!.Camera.camera_number}
+            {mainData.event!.camera.camera_number +
+              " - " +
+              moment(mainData.event!.timestamp).format("mm")}
           </p>
         </div>
         <div className="d-flex flex-wrap">
@@ -131,7 +136,8 @@ export default function Classify() {
                 key={"img" + plate.id}
               />
               <p className="text-center my-0" key={"p" + plate.id}>
-                {plate.Plate.plate} - {plate.Camera.camera_number}
+                {plate.plate.plate} - {plate.camera.camera_number} -{" "}
+                {moment(plate.timestamp).format("mm")}
               </p>
             </div>
           ))}

@@ -7,15 +7,29 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model VehicleType {
+  id     String  @id @default(uuid())
+  name   String  @unique
+  plates Plate[]
+}
+
+model Plate {
+  id              String      @id
+  plate           String      @unique
+  vehicle_type_id String
+  vehicle_type    VehicleType @relation(fields: [vehicle_type_id], references: [id])
+  events          Event[]
+}
+
 model Camera {
-  id            String  @id
+  id            String  @id @default(uuid())
   camera_number Int     @unique
   facing        Facing  @default(North)
-  Event         Event[]
+  events        Event[]
 }
 
 model Event {
-  id          String     @id
+  id          String     @id @default(uuid())
   plate_id    String?
   object_type ObjectType @default(Unknown)
   camera_id   String
@@ -23,28 +37,8 @@ model Event {
   image       String
   direction   Direction  @default(Unknown)
   event_type  EventType
-  Camera      Camera     @relation(fields: [camera_id], references: [id])
-  Plate       Plate?     @relation(fields: [plate_id], references: [id])
-}
-
-model Plate {
-  id              String      @id @default(uuid())
-  plate           String     @unique
-  vehicle_type_id String
-  VehicleType     VehicleType @relation(fields: [vehicle_type_id], references: [id])
-  Event           Event[]
-}
-
-model VehicleType {
-  id    String  @id
-  name  String  @unique
-  Plate Plate[]
-}
-
-enum Direction {
-  Forward
-  Backward
-  Unknown
+  camera      Camera     @relation(fields: [camera_id], references: [id])
+  plate       Plate?     @relation(fields: [plate_id], references: [id])
 }
 
 enum EventType {
@@ -57,6 +51,12 @@ enum Facing {
   South
   East
   West
+}
+
+enum Direction {
+  Forward
+  Backward
+  Unknown
 }
 
 enum ObjectType {

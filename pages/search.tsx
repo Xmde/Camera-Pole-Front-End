@@ -94,10 +94,10 @@ export default function Search(data: EventQuery) {
 
   const generateDirection = (event: eventWithPlateAndCamera) => {
     if (event.direction === "Backward") {
-      return event.Camera.facing;
+      return event.camera.facing;
     }
     if (event.direction === "Forward") {
-      if (event.Camera.facing === "North") {
+      if (event.camera.facing === "North") {
         return "South";
       }
       return "North";
@@ -173,7 +173,7 @@ export default function Search(data: EventQuery) {
                           {moment(value.timestamp).format("HH:mm:ss")}{" "}
                         </td>
                         <td className="align-middle">
-                          {value.Camera.camera_number}
+                          {value.camera.camera_number}
                         </td>
                         <td className="align-middle">
                           {generateDirection(value)}
@@ -263,9 +263,9 @@ export default function Search(data: EventQuery) {
                           {moment(value.timestamp).format("HH:mm:ss")}{" "}
                         </td>
                         <td className="align-middle">{value.object_type} </td>
-                        <td className="align-middle">{value.Plate?.plate} </td>
+                        <td className="align-middle">{value.plate?.plate} </td>
                         <td className="align-middle">
-                          {value.Camera.camera_number}
+                          {value.camera.camera_number}
                         </td>
                         <td className="align-middle">
                           {generateDirection(value)}
@@ -292,7 +292,7 @@ export default function Search(data: EventQuery) {
 }
 
 export async function getServerSideProps(context: GetServerSidePropsContext) {
-  const plate: string = String(context.query.plate);
+  const plate: string = String(context.query.plate).toUpperCase();
   const plate_id = convertPlate(plate);
   const start = moment.unix(Number(context.query.start)).utc();
   const end = moment.unix(Number(context.query.end)).utc();
@@ -311,8 +311,8 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
         plate_id: plate_id,
       },
       include: {
-        Plate: true,
-        Camera: true,
+        plate: true,
+        camera: true,
       },
       orderBy: {
         timestamp: "desc",
@@ -331,8 +331,8 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
         },
       },
       include: {
-        Plate: true,
-        Camera: true,
+        plate: true,
+        camera: true,
       },
       orderBy: {
         timestamp: "desc",

@@ -26,7 +26,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
             direction: req.body.direction,
           },
           include: {
-            Plate: true,
+            plate: true,
           },
         });
         res.status(200).json(eventUpdate);

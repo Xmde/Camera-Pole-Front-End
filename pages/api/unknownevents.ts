@@ -28,7 +28,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         timestamp: "asc",
       },
       include: {
-        Camera: true,
+        camera: true,
       },
     });
     res.status(200).json(events);

@@ -16,7 +16,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       where: {
         timestamp: {
           gte: moment(mainEvent.timestamp).toDate(),
-          lte: moment(mainEvent.timestamp).add(1, "hour").toDate(),
+          lte: moment(mainEvent.timestamp).add(15, "minutes").toDate(),
         },
         plate_id: {
           not: null,
@@ -31,15 +31,15 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       },
       take: 10,
       include: {
-        Plate: true,
-        Camera: true,
+        plate: true,
+        camera: true,
       },
     });
 
     const eventsBefore = await prisma.event.findMany({
       where: {
         timestamp: {
-          gte: moment(mainEvent.timestamp).subtract(1, "hour").toDate(),
+          gte: moment(mainEvent.timestamp).subtract(15, "minutes").toDate(),
           lte: moment(mainEvent.timestamp).toDate(),
         },
         plate_id: {
@@ -55,8 +55,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       },
       take: 10,
       include: {
-        Plate: true,
-        Camera: true,
+        plate: true,
+        camera: true,
       },
     });
 
