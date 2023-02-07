@@ -54,10 +54,22 @@ export default function Navbar(props: any) {
             </Link>
           </li>
           <li className="nav-item mx-2 py-0">
-            <Link href="/plates" className="text-decoration-none">
+            <Link href="/stats-multiday" className="text-decoration-none">
               <p
                 className={`nav-link ${
                   props.active === "4" ? "active" : ""
+                } text-white my-0`}
+                aria-current="page"
+              >
+                Multi-day Stats
+              </p>
+            </Link>
+          </li>
+          <li className="nav-item mx-2 py-0">
+            <Link href="/plates" className="text-decoration-none">
+              <p
+                className={`nav-link ${
+                  props.active === "5" ? "active" : ""
                 } text-white my-0`}
                 aria-current="page"
               >
@@ -69,7 +81,7 @@ export default function Navbar(props: any) {
             <Link href="/pplbikes" className="text-decoration-none">
               <p
                 className={`nav-link ${
-                  props.active === "5" ? "active" : ""
+                  props.active === "6" ? "active" : ""
                 } text-white my-0`}
                 aria-current="page"
               >

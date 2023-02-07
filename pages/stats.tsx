@@ -198,39 +198,41 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
   console.log(vehicleTypeCounts);
   console.log(plateCounts);
 
-  let previousEvent = moment(events[0].timestamp);
   let numCabs = 0;
   let numTrailers = 0;
   let truckAndTrailerEstimate = 0;
-  let seenPlates: string[] = [];
-  for (const event of events) {
-    if (event.plate === null) continue;
-    if (
-      event.plate.vehicle_type.name !== "Shanda Cab" &&
-      event.plate.vehicle_type.name !== "Shanda Trailer"
-    )
-      continue;
-    if (seenPlates.includes(event.plate.plate)) continue;
-    seenPlates.push(event.plate.plate);
+  if (events.length > 0) {
+    let previousEvent = moment(events[0].timestamp);
+    let seenPlates: string[] = [];
+    for (const event of events) {
+      if (event.plate === null) continue;
+      if (
+        event.plate.vehicle_type.name !== "Shanda Cab" &&
+        event.plate.vehicle_type.name !== "Shanda Trailer"
+      )
+        continue;
+      if (seenPlates.includes(event.plate.plate)) continue;
+      seenPlates.push(event.plate.plate);
 
-    const timeSinceLastEvent = moment(event.timestamp).diff(
-      previousEvent,
-      "minutes"
-    );
+      const timeSinceLastEvent = moment(event.timestamp).diff(
+        previousEvent,
+        "minutes"
+      );
 
-    if (event.plate.vehicle_type.name === "Shanda Cab") {
-      numCabs += 1;
-    } else if (event.plate.vehicle_type.name === "Shanda Trailer") {
-      numTrailers += 1;
-    }
+      if (event.plate.vehicle_type.name === "Shanda Cab") {
+        numCabs += 1;
+      } else if (event.plate.vehicle_type.name === "Shanda Trailer") {
+        numTrailers += 1;
+      }
 
-    if (timeSinceLastEvent > 5) {
-      if (numCabs > numTrailers) truckAndTrailerEstimate += numCabs;
-      else truckAndTrailerEstimate += numTrailers;
-      numCabs = 0;
-      numTrailers = 0;
-      seenPlates = [];
-      previousEvent = moment(event.timestamp);
+      if (timeSinceLastEvent > 5) {
+        if (numCabs > numTrailers) truckAndTrailerEstimate += numCabs;
+        else truckAndTrailerEstimate += numTrailers;
+        numCabs = 0;
+        numTrailers = 0;
+        seenPlates = [];
+        previousEvent = moment(event.timestamp);
+      }
     }
   }
 

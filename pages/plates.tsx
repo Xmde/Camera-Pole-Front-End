@@ -83,7 +83,7 @@ export default function Plates({
   };
 
   return (
-    <Layout active_navbar="4">
+    <Layout active_navbar="5">
       <>
         <PopupImage image={image} closePopup={() => setImage("")} />
         <div className="container-fluid">
@@ -197,7 +197,6 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
     include: {
       vehicle_type: true,
       events: {
-        take: 4,
         orderBy: {
           timestamp: "asc",
         },
@@ -228,7 +227,6 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
     include: {
       vehicle_type: true,
       events: {
-        take: 4,
         orderBy: {
           timestamp: "asc",
         },
@@ -268,6 +266,12 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
     } else {
       return 0;
     }
+  });
+
+  // Limit events in each plate to 4 max.
+
+  plates.forEach((plate) => {
+    plate.events = plate.events.slice(0, 4);
   });
 
   const vehicleTypes = await prisma.vehicleType.findMany();
