@@ -192,7 +192,7 @@ export default function Plates({
 export async function getServerSideProps(context: GetServerSidePropsContext) {
   const cookies = cookie.parse(context.req.headers.cookie ?? "");
   const filter_date = Number(cookies.filter_date) || 0;
-  console.log(moment.unix(filter_date).format("YYYY-MM-DD HH:mm:ss"));
+  // console.log(moment.unix(filter_date).format("YYYY-MM-DD HH:mm:ss"));
   let plates = await prisma.plate.findMany({
     include: {
       vehicle_type: true,

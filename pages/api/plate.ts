@@ -61,7 +61,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           vehicle_type_id = vehicle_type.id;
         }
 
-        console.log(vehicle_type_id);
+        // console.log(vehicle_type_id);
         const plateCreate = await prisma.plate.upsert({
           where: {
             id: convertPlate(req.body.plate),

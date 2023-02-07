@@ -195,8 +195,8 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
 
   const totalVehicles = Object.values(plateCounts).reduce((a, b) => a + b, 0);
 
-  console.log(vehicleTypeCounts);
-  console.log(plateCounts);
+  // console.log(vehicleTypeCounts);
+  // console.log(plateCounts);
 
   let numCabs = 0;
   let numTrailers = 0;

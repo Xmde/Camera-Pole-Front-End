@@ -34,7 +34,7 @@ export default function Classify() {
     const startEpoch = moment(date).startOf("day").utc().unix();
     const endEpoch = moment(date).endOf("day").utc().unix();
 
-    console.log("/api/unknownevents?start=" + startEpoch + "&end=" + endEpoch);
+    // console.log("/api/unknownevents?start=" + startEpoch + "&end=" + endEpoch);
 
     const res = await fetch(
       "/api/unknownevents?start=" + startEpoch + "&end=" + endEpoch
@@ -52,8 +52,8 @@ export default function Classify() {
       event: data[0],
       nearPlates: nearPlatesData,
     });
-    console.log(data[0]);
-    console.log(nearPlatesData);
+    // console.log(data[0]);
+    // console.log(nearPlatesData);
   };
 
   const classify = async (
@@ -99,7 +99,7 @@ export default function Classify() {
       vehicle_type_id: motorbike ? "motorbike" : null,
     });
 
-    console.log(raw);
+    // console.log(raw);
 
     const requestOptions: RequestInit = {
       method: "POST",
