@@ -134,8 +134,8 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
   const events = await prisma.event.findMany({
     where: {
       timestamp: {
-        gte: date.startOf("day").toDate(),
-        lte: date.endOf("day").toDate(),
+        gte: date.startOf("day").utc().toDate(),
+        lte: date.endOf("day").utc().toDate(),
       },
     },
     orderBy: {
